@@ -1,41 +1,31 @@
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import Interfaces.ActorParser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 import java.util.Scanner;
 
 public class Synchronous {
 
     public static void main(String[] args) throws IOException {
+        Scanner userInput = new Scanner(System.in);
+        ActorParser actorParser = new ActorParser();
+
+        System.out.print("Please enter the path to the IMDB directory: ");
+        String path = userInput.nextLine();
+
         while(true){
+            //get the name of the actor
             System.out.print("Please enter a name: ");
-            Scanner userInput = new Scanner(System.in);
-            String in = userInput.nextLine();
+            String name = userInput.nextLine();
 
-            CSVParser parser = CSVFormat.TDF.withHeader("nconst", "primaryName", "birthYear", "deathYear", "primaryProfession", "knownForTitles")
-                    .parse(new BufferedReader(new FileReader(new File("~/IMDB/name.basics.tsv"))));
+            //start parsing our files
+            actorParser.parse(path, name);
 
-            List<CSVRecord> list = parser.getRecords();
+            //writes the name on the first line
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File("./out/" + name.substring(name.lastIndexOf(" ") + 1) + ".roles")));
+            writer.write(name, 0, name.length());
+            writer.newLine();
 
-            CSVRecord result = null;
-            for (CSVRecord record : list) {
-                if(record.get("primaryName").equalsIgnoreCase(in)) {
-                    result = record;
-                    break;
-                }
-            }
-
-            if(result == null){
-                System.out.println("Result not found");
-            }
-            else{
-
-            }
+            //writes the
         }
     }
 }
