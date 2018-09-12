@@ -3,12 +3,14 @@ package Interfaces;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Actor {
     private String name;
     private String nconst;
-    private ArrayList<Title> titles;
+    private Map<String, ArrayList<Title>> jobs;
 
     public String getName(){
         return name;
@@ -18,28 +20,29 @@ public class Actor {
         return nconst;
     }
 
-    public ArrayList<Title> getTitles(){
-        return titles;
+    public ArrayList<String> getJobs() {
+        return new ArrayList<String>(jobs.keySet());
     }
 
-    public boolean addTitle(Title t) {
-        return titles.add(t);
+    public ArrayList<Title> getTitles(String job){
+        return jobs.get(job);
     }
 
-    public boolean addTitle(List<Title> list){
-        for (Title title : list) {
-            if(!titles.add(title))
-                return false;
+    public void addTitle(String job, Title title) {
+        if(jobs.containsKey(job))
+            jobs.get(job).add(title);
+        else {
+            ArrayList<Title> arr = new ArrayList<Title>();
+            arr.add(title);
+            jobs.put(job, arr);
         }
-
-        return true;
     }
 
     public static Actor fromRecord(CSVRecord record){
         Actor actor = new Actor();
         actor.name = record.get("primaryName");
         actor.nconst = record.get("nconst");
-        actor.titles = new ArrayList<Title>();
+        actor.jobs = new HashMap<String, ArrayList<Title>>();
         return actor;
     }
 }
