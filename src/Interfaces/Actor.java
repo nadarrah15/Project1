@@ -12,6 +12,13 @@ public class Actor {
     private String nconst;
     private Map<String, ArrayList<Title>> jobs;
 
+    public Actor() {}
+
+    public Actor(String name, String nconst){
+        this.name = name;
+        this.nconst = nconst;
+    }
+
     public String getName(){
         return name;
     }
@@ -28,12 +35,12 @@ public class Actor {
         return jobs.get(job);
     }
 
-    public void addTitle(String job, Title title) {
+    public void addTitle(String job, Title Title) {
         if(jobs.containsKey(job))
-            jobs.get(job).add(title);
+            jobs.get(job).add(Title);
         else {
             ArrayList<Title> arr = new ArrayList<Title>();
-            arr.add(title);
+            arr.add(Title);
             jobs.put(job, arr);
         }
     }

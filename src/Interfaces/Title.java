@@ -6,6 +6,13 @@ public class Title {
     private String name;
     private String tconst;
 
+    public Title() {}
+
+    public Title(String titleToken, String name) {
+        tconst = titleToken;
+        this.name = name;
+    }
+
     public String getName(){
         return name;
     }

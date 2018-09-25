@@ -34,16 +34,21 @@ public class Synchronous {
                 writer.newLine();
 
                 //writes the job
-                List<String> list = actor.getJobs();
-                for (String job : list) {
+                for (String job : actor.getJobs()) {
                     writer.newLine();
-                    writer.write(job);
+                    writer.write("Job: " + job);
+                    writer.newLine();
+                    writer.write("Titles: ");
                     writer.newLine();
                     for(Title title : actor.getTitles(job)){
                         writer.write(title.getName());
                         writer.newLine();
                     }
+                    writer.newLine();
                 }
+
+                writer.flush();
+                writer.close();
             }
         }
     }
@@ -62,31 +67,68 @@ public class Synchronous {
         }
 
         if(actor != null) {
-            parseTitles(actor, path);
+            actor = parseTitles(actor, path);
         }
 
         return actor;
     }
 
-    private static void parseTitles(Actor actor, String path) throws IOException{
-        //Parse the principals file
-        CSVParser parser = CSVFormat.TDF.withNullString("/N").withFirstRecordAsHeader()
-                .parse(new FileReader(new File(path + "/title.principals.tsv")));
+    private static Actor parseTitles(Actor actorParam, String path) throws IOException{
 
-        // iterate through the parser
-        for (CSVRecord record : parser) {
-            if(record.get("nconst").equalsIgnoreCase(actor.getNameToken())) {
-                // parse the basics file for the title information
-                CSVParser parser2 = CSVFormat.TDF.withFirstRecordAsHeader()
-                        .parse(new FileReader(new File(path + "/title.basics.tsv")));
-                String titleToken = record.get("tconst");
-                for (CSVRecord record2 : parser2) {
-                    if(record2.get("tconst").equalsIgnoreCase(titleToken)){
-                        actor.addTitle(record.get("job"), Title.fromRecord(record2));
-                        break;
-                    }
+        Actor actor = actorParam;
+        //Parse the principals file
+        //CSVParser parser = CSVFormat.TDF.withNullString("/N").withFirstRecordAsHeader()
+                //.parse(new FileReader(new File(path + "/title.principals.tsv")));
+
+        //Using a buffered reader because the CSVParser hates these files for some reason
+        BufferedReader br = new BufferedReader(new FileReader(new File(path + "/title.principals.tsv")));
+        String[] header = br.readLine().split("\t");
+//
+//        for(String head : header) {
+//            System.out.println(head);
+//        }
+
+        Map<String, ArrayList<String>> results = new HashMap<String, ArrayList<String>>();
+        // iterate through the file
+        String s = br.readLine();
+        while (s != null) {
+            String[] line = s.split("\t");
+
+            if(line[2].equalsIgnoreCase(actor.getNameToken())){
+                if(results.containsKey(line[4])){
+                    results.get(line[4]).add(line[0]);  // 0 = tconst, 4 = job
+                }
+                else {
+                    ArrayList<String> list = new ArrayList<String>();
+                    list.add(line[0]);
+                    results.put(line[4], list);
                 }
             }
+            s = br.readLine();
         }
+
+        br = new BufferedReader(new FileReader(new File(path + "/title.basics.tsv")));
+
+        header = br.readLine().split("\t");
+
+//        for(String head : header) {
+//            System.out.println(head);
+//        }
+
+        s = br.readLine();
+        while(s != null) {
+            String[] line = s.split("\t");
+
+            for(String key : results.keySet()) {
+                List list = results.get(key);
+                if (list.contains(line[0])){
+                    actor.addTitle(key, new Title(line[0], line[2]));   // 0 = tconst, 2 = primaryTitle
+                }
+            }
+
+            s = br.readLine();
+        }
+
+        return actor;
     }
 }
